@@ -2,14 +2,9 @@ import os
 import fitz
 import argparse
 
-def showPDFonNewPage(trgt, src, pno, pagesize="A4"):
-
-    spage = src[pno]
-
-    width, height = fitz.PaperSize(pagesize)
-    page = trgt.newPage(-1, width = width, height = height)
-
-    page.showPDFpage(page.rect, src, pno)
+def showPDFonNewPage(trgt, src, pno):
+	spage = src[pno]
+	page.showPDFpage(trgt.rect, src, pno)
 
 def findPDFrecursive(rootdir):
     paths = []
@@ -38,17 +33,23 @@ for path in args.input:
 
 doc = fitz.open()
 
+pagesize="A4"
+width, height = fitz.PaperSize(pagesize)
+
+
+
 for path in pdffiles:
-    print("adding {}".format(path))
-    incremental = doc.pageCount > 0 # need an initial document for incremental save
+	print("adding {}".format(path))
+	incremental = doc.pageCount > 0 # need an initial document for incremental save
 
-    src = fitz.open(path)
-    for n in range(src.pageCount):
-        showPDFonNewPage(doc, src, n)
+	src = fitz.open(path)
+	for n in range(src.pageCount):
+		page = doc.newPage(-1, width = width, height = height)
+		showPDFonNewPage(page, src, n)
 
-    doc.save(outfile,
-             #garbage = 4, # eliminate duplicate objects
-             deflate = True, # compress stuff where possible
-             incremental=incremental)
+		doc.save(outfile,
+				 #garbage = 4, # eliminate duplicate objects
+				 deflate = True, # compress stuff where possible
+				 incremental=incremental)
 
-    doc = fitz.open(outfile)
+	doc = fitz.open(outfile)
