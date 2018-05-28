@@ -1,0 +1,29 @@
+#+title Garner PDFs
+#+author: Thomas Rometsch
+
+* Purpose
+
+This is a tool to collect pdf files with different dimensions like Letter, A4, A5, ..., scale them to A4 and put them into a single PDF file.
+The main purpose is to collect (thus the name *garner*) a large number of PDFs to print them in one go.
+
+* Dependencies
+
+To perform PDF manipulation the =PyMuPDF= package is required.
+Check out their [[https://github.com/rk700/PyMuPDF][GitHub page]] for installation instructions.
+
+Running
+#+BEGIN_SRC sh
+pip install --user pymupdf
+#+END_SRC
+did the job for me.
+
+* Usage
+
+The syntax of =garnerpdf.py= is
+
+#+BEGIN_EXAMPLE
+garnerpdf.py [-h] outfile input [input ...]
+#+END_EXAMPLE
+
+So first specify the output file, and then provide a list of directories and or files.
+You can mix files and directories and the latter are searched recursively for PDF files.

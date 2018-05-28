@@ -18,25 +18,28 @@ def findPDFrecursive(rootdir):
         for file in files:
             if file[-4:] == ".pdf":
                 paths.append( os.path.join( root, file) )
-                print( os.path.join(root, file))
     return paths
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-d", "--dirs", nargs='*', default=[], help='directory to search recisively for pdf files')
-parser.add_argument("-f", "--files", nargs='*', default= [], help='list of files to include')
+parser.add_argument("outfile", help="Output file")
+parser.add_argument("input", nargs="+", help="A list of files and or directories to be included. In case of a directory, it is recursively searched for pdf files.")
 args = parser.parse_args()
 
-outfile = 'out.pdf'
+outfile = args.outfile
 
-pdffiles = args.files
+pdffiles = []
+for path in args.input:
+    if os.path.isdir(path):
+        pdffiles += findPDFrecursive(path)
+    else:
+        if path[-4:] == ".pdf":
+            pdffiles.append(path)
 
-for dir in args.dirs:
-    pdffiles += findPDFrecursive(dir)
 
 doc = fitz.open()
 
 for path in pdffiles:
-    print("process {}".format(path))
+    print("adding {}".format(path))
     incremental = doc.pageCount > 0 # need an initial document for incremental save
 
     src = fitz.open(path)
