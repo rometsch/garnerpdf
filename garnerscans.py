@@ -11,6 +11,15 @@ def showPDFonNewPage(trgt, src, pno, pagesize="A4"):
 
     page.showPDFpage(page.rect, src, pno)
 
+def findPDFrecursive(rootdir):
+    paths = []
+    # traverse directory, and collect the paths of PDF files
+    for root, dirs, files in os.walk(rootdir):
+        for file in files:
+            if file[-4:] == ".pdf":
+                paths.append( os.path.join( root, file) )
+                print( os.path.join(root, file))
+    return paths
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--dirs", nargs='*', default=[], help='directory to search recisively for pdf files')
@@ -22,8 +31,7 @@ outfile = 'out.pdf'
 pdffiles = args.files
 
 for dir in args.dirs:
-    l = os.listdir(dir)
-    pdffiles += [os.path.join(dir, s) for s in l if s[-4:] == ".pdf"]
+    pdffiles += findPDFrecursive(dir)
 
 doc = fitz.open()
 
