@@ -1,4 +1,4 @@
-#+title Garner PDFs
+#+title: Garner PDFs
 #+author: Thomas Rometsch
 
 * Purpose
