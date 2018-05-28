@@ -1,8 +1,6 @@
 #+title: Garner PDFs
 #+author: Thomas Rometsch
 
-* Purpose
-
 This is a tool to collect pdf files with different dimensions like Letter, A4, A5, ..., scale them to A4 and put them into a single PDF file.
 The main purpose is to collect (thus the name *garner*) a large number of PDFs to print them in one go.
 
