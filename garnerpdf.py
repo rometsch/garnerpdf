@@ -63,8 +63,9 @@ try:
 	idx = sortFiles([os.path.basename(s) for s in pdffiles], args.sep, args.nsort)
 	pdffiles = [pdffiles[i] for i in idx]
 	print([os.path.basename(s) for s in pdffiles])
-except:
-	pass
+except Exception as e:
+	print("Something went wrong while sorting filenames, continuing without:")
+	print(e)
 
 doc = fitz.open()
 
