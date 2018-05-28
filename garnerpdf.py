@@ -2,9 +2,20 @@ import os
 import fitz
 import argparse
 
-def showPDFonNewPage(trgt, src, pno):
+def showPDFonNewPage(trgt, src, pno, pos):
+	if pos == 1:
+		rect = trgt.rect
+		rect.y1 = rect.y1/2
+		print('pos 1, {}'.format(rect))
+	elif pos == 2:
+		rect = trgt.rect
+		rect.y0 = rect.y1/2
+		print('pos 2, {}'.format(rect))
+	else:
+		rect = trgt.rect
+
 	spage = src[pno]
-	page.showPDFpage(trgt.rect, src, pno)
+	page.showPDFpage(rect, src, pno)
 
 def findPDFrecursive(rootdir):
     paths = []
@@ -37,6 +48,8 @@ pagesize="A4"
 width, height = fitz.PaperSize(pagesize)
 
 
+# flag for printing two landscape pages onto portrait
+isFirstLandscape = True
 
 for path in pdffiles:
 	print("adding {}".format(path))
@@ -44,8 +57,22 @@ for path in pdffiles:
 
 	src = fitz.open(path)
 	for n in range(src.pageCount):
-		page = doc.newPage(-1, width = width, height = height)
-		showPDFonNewPage(page, src, n)
+		sw, sh = src[n].MediaBoxSize
+		if (sh > sw):
+			pos = 0
+			page = doc.newPage(-1, width = width, height = height)
+		else:
+			print ('landscape')
+			if isFirstLandscape:
+				pos = 1
+				isFirstLandscape = False
+				page = doc.newPage(-1, width = width, height = height)
+			else:
+				pos = 2
+				isFirstLandscape = True
+				page = doc[-1]
+
+		showPDFonNewPage(page, src, n, pos=pos)
 
 		doc.save(outfile,
 				 #garbage = 4, # eliminate duplicate objects
