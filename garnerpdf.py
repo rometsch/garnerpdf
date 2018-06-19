@@ -5,8 +5,6 @@ import argparse
 
 def showPDFonNewPage(page, src, pno, pos):
 	spage = src[pno]
-	if spage.rotation != 0 and pos == 0:
-		page.setRotation(spage.rotation)
 
 	if pos == 1:
 		rect = page.rect
@@ -17,10 +15,31 @@ def showPDFonNewPage(page, src, pno, pos):
 	else:
 		rect = page.rect
 
-	#print(spage.rotation)
-	page.showPDFpage(rect, src, pno)
-	#print("pos {}, {}".format(pos, rect))
-	page.setRotation(0)
+
+	if spage.rotation == 0:
+		page.showPDFpage(rect, src, pno)
+	else:
+
+		# This handles images where the image is not stored as displayed, but the page rotation is set.
+		# First the page is rendered into a pixmap at a resolution close to the image resolution and then
+		# then the pixmap is shown on the new page
+		imgList = spage.getImageList()
+		if len(imgList) != 1:
+			raise RuntimeError("Encountered a page with more than one image and rotation. Contact the developer to resolve this issue!")
+		img = imgList[0]
+		print(img)
+		lmax = max(img[2], img[3])
+
+		sw, sh = pageSize(spage)
+
+		#pixmap = spage.getPixmap(colorspace=fitz.csGRAY)
+		scale = lmax/ max(sw, sh)
+		mat = fitz.Matrix(3.0, 3.0)
+		pm = spage.getPixmap( matrix = mat, colorspace=fitz.csGRAY)
+		page.insertImage(rect, pixmap = pm)
+		print("extracted pixmap with res : width = {}, height = {}".format(pm.width, pm.height))
+
+
 
 def findPDFrecursive(rootdir):
     paths = []
@@ -42,9 +61,14 @@ def sortFiles(filenames, sep, nsort):
 	return [x for x,y in sorted(enumerate(features), key = lambda x: x[1])]
 	#return sorted(range(len(features)), key=features.__getitem__)
 
+def pageSize(page):
+	" Width and Height of the page. """
+	dims = page.bound()[2:]
+	return dims
+
 def pageOrientation(page):
 	""" Get the orientation for a pymupdf page object."""
-	sw, sh = page.bound()[2:]
+	sw, sh = pageSize(page)
 	print('page detected with width {} x height {}'.format(sw, sh))
 	if sw < sh:
 		return "portrait"
@@ -95,7 +119,7 @@ for path in pdffiles:
 
 	src = fitz.open(path)
 	for n in range(src.pageCount):
-		if ( pageOrientation(src[n]) == "portrait" ):
+		if pageOrientation(src[n]) == "portrait":
 			pos = 0
 			page = doc.newPage(-1, width = width, height = height)
 		else:
