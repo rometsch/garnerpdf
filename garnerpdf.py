@@ -42,6 +42,17 @@ def sortFiles(filenames, sep, nsort):
 	return [x for x,y in sorted(enumerate(features), key = lambda x: x[1])]
 	#return sorted(range(len(features)), key=features.__getitem__)
 
+def pageOrientation(page):
+	""" Get the orientation for a pymupdf page object."""
+	sw, sh = page.bound()[2:]
+	print('page detected with width {} x height {}'.format(sw, sh))
+	if sw < sh:
+		return "portrait"
+	else:
+		return "landscape"
+
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument("outfile", help="Output file")
 parser.add_argument("input", nargs="+", help="A list of files and or directories to be included. In case of a directory, it is recursively searched for pdf files.")
@@ -84,8 +95,7 @@ for path in pdffiles:
 
 	src = fitz.open(path)
 	for n in range(src.pageCount):
-		sw, sh = src[n].MediaBoxSize
-		if (sh > sw):
+		if ( pageOrientation(src[n]) == "portrait" ):
 			pos = 0
 			page = doc.newPage(-1, width = width, height = height)
 		else:
@@ -105,5 +115,7 @@ for path in pdffiles:
 				 #garbage = 4, # eliminate duplicate objects
 				 deflate = True, # compress stuff where possible
 				 incremental=incremental)
+
+	print('')
 
 	doc = fitz.open(outfile)
